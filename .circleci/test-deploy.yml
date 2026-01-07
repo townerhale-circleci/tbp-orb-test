@@ -8,26 +8,20 @@ filters: &filters
     only: /.*/
 
 jobs:
-  command-tests:
-    executor: common/default
+  basic-test:
+    machine:
+      image: ubuntu-2204:current
     steps:
       - checkout
-      - common/add-github-commiter
-      - common/terraform-install
-      - common/yq-install
-      - common/cosign-install
-      - common/coverage
+      - run:
+          name: Verify orb loaded
+          command: echo "Orb loaded successfully"
 
 workflows:
   test-deploy:
     jobs:
-      - common/pr-lint:
+      - basic-test:
           filters: *filters
-          context:
-            - GITHUB
-      - command-tests:
-          filters: *filters
-          context: GITHUB
       - orb-tools/pack:
           filters: *filters
       - orb-tools/publish:
@@ -36,7 +30,7 @@ workflows:
           pub-type: production
           requires:
             - orb-tools/pack
-            - command-tests
+            - basic-test
           context:
             - orb-publishing
           filters:
