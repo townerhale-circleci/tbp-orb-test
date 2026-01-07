@@ -38,7 +38,7 @@ workflows:
             - orb-tools/pack
             - command-tests
           context:
-            - GITHUB
+            - orb-publishing
           filters:
             branches:
               ignore: /.*/
