@@ -1,0 +1,57 @@
+description: |
+  This will bump the release version of your service, tag it and publish to github.
+parameters:
+  package-manager:
+    type: string
+    default: yarn
+    description: Which package manager to use. 'yarn' or 'npm'
+  executor-tag:
+    type: string
+    default: lts
+    description: |
+      Pick a specific circleci/node image variant: https://hub.docker.com/r/cimg/node/tags
+  dry-run:
+    type: boolean
+    default: false
+  ci:
+    type: boolean
+    default: true
+steps:
+  - when:
+      condition:
+        equal:
+          - yarn
+          - << parameters.package-manager >>
+      steps:
+        - run:
+            name: Run semantic release with Yarn
+            command: yarn semantic-release -d << parameters.dry-run >> --ci << parameters.ci >> --ignore-workspace-root-check
+            executor:
+              name: common/default
+              tag: << parameters.executor-tag >>
+            environment:
+              NPM_CONFIG_LOGLEVEL: verbose
+  - when:
+      condition:
+        equal:
+          - npm
+          - << parameters.package-manager >>
+      steps:
+        - run:
+            name: Run semantic release with NPM
+            command: npx semantic-release -d << parameters.dry-run >> --ci << parameters.ci >>
+            executor:
+              name: common/default
+              tag: << parameters.executor-tag >>
+  - when:
+      condition:
+        equal:
+          - pnpm
+          - << parameters.package-manager >>
+      steps:
+        - run:
+            name: Run semantic release with Pnpm
+            command: pnpm semantic-release -d << parameters.dry-run >> --ci << parameters.ci >>
+            executor:
+              name: common/default
+              tag: << parameters.executor-tag >>

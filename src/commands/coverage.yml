@@ -1,0 +1,50 @@
+description: Runs Coverage on the codebase.
+parameters:
+  file:
+    default: ""
+    description: Path to the code coverage data file to upload.
+    type: string
+  flags:
+    default: ""
+    description: Flag the upload to group coverage metrics (e.g. unittests | integration | ui,chrome)
+    type: string
+  token:
+    default: CODECOV_TOKEN
+    description: Set the private repository token as the value of the variable CODECOV_TOKEN using CircleCI Environment Variables.
+    type: env_var_name
+  upload_name:
+    default: ${CIRCLE_BUILD_NUM}
+    description: Custom defined name of the upload. Visible in Codecov UI
+    type: string
+  version:
+    default: latest
+    description: Which version of the Codecov Uploader to use (defaults to 'latest')
+    type: string
+  when:
+    default: always
+    description: When should this step run?
+    type: string
+steps:
+  - when:
+      condition:
+        not:
+          equal:
+            - ""
+            - $CODECOV_TOKEN
+      steps:
+        - codecov/upload:
+            token: CODECOV_TOKEN
+            files: << parameters.file >>
+            flags: << parameters.flags >>
+            upload_name: << parameters.upload_name >>
+            version: << parameters.version >>
+            when: << parameters.when >>
+  - when:
+      condition:
+        equal:
+          - ""
+          - $CODECOV_TOKEN
+      steps:
+        - run:
+            name: codecov token not configured
+            command: echo "No token passed to codecov" && exit 0

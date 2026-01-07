@@ -1,0 +1,14 @@
+description: Adds assignees to github PR.
+parameters:
+  executor-tag:
+    type: string
+    default: lts
+    description: |
+      Pick a specific circleci/node image variant: https://hub.docker.com/r/cimg/node/tags
+steps:
+  - run:
+      name: include author assign
+      command: <<include(scripts/author_assign.sh)>>
+      executor:
+        name: common/default
+        tag: << parameters.executor-tag >>

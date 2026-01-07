@@ -1,0 +1,30 @@
+description: Generate terraform documents in all terraform folders.
+parameters:
+  root-dir:
+    type: string
+    default: terraform
+    description: Path to root of terraform directory
+  commit:
+    type: boolean
+    default: true
+    description: Should we commit the changes after generating docs
+  workspace:
+    type: string
+    default: ""
+    description: If we need to specify a terraform workspace, what is it?
+steps:
+  - run:
+      name: Setup tfdocs
+      command: <<include(scripts/install-tfdocs.sh)>>
+  - run:
+      name: Run terraform docs
+      command: terraform-docs -c .terraform-docs.yml << parameters.root-dir >>
+  - when:
+      condition: << parameters.commit >>
+      steps:
+        - run:
+            environment:
+              ROOT_DIR: << parameters.root-dir >>
+              TF_WORKSPACE: << parameters.workspace >>
+            name: Check in documentation
+            command: <<include(scripts/commit-docs.sh)>>

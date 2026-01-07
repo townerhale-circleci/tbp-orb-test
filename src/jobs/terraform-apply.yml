@@ -1,0 +1,16 @@
+description: Applies a terraform directory
+executor: default
+parameters:
+  app_version:
+    type: string
+    default: latest
+    description: app_version to pass to terraform as a variable. Often used for deploying certain image versions.
+  stack:
+    type: string
+    description: If we need to specify a spacelift stack, what is it?
+steps:
+  - checkout
+  - terraform-install
+  - terraform-apply:
+      app_version: << parameters.app_version >>
+      stack: << parameters.stack >>

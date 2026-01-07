@@ -1,0 +1,37 @@
+description: Publish openAPI docs to Gitbook
+parameters:
+  service-name:
+    type: string
+    description: Name of the service to generate docs for
+  service-host:
+    type: string
+    description: Service hostname to scrape the openAPI docs from
+steps:
+  - add-github-commiter
+  - run:
+      name: Clone public-api-docs repo
+      command: git clone git@github.com:pinginc/public-api-docs.git
+  - run:
+      name: Check out docs branch
+      command: |
+        cd public-api-docs
+        git fetch --all && git checkout docs
+  - run:
+      name: Scrape docs
+      command: |
+        cd public-api-docs
+        ./bin/generate-openapi.sh << parameters.service-name >> << parameters.service-host >>
+  - run:
+      name: Generate markdown
+      command: |
+        cd public-api-docs
+        ./bin/generate-service-md.py << parameters.service-name >>
+  - run:
+      name: Commit changes
+      command: |
+        cd public-api-docs
+        if [[ `git status --porcelain` ]]; then
+          git add docs .gitbook
+          git commit -m "chore: Update service markdown for << parameters.service-name >>"
+          git push
+        fi

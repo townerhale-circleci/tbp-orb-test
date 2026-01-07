@@ -1,0 +1,20 @@
+description: Logs into AWS using OIDC for the specified account.
+parameters:
+  environment:
+    description: Environment to login to
+    type: string
+    default: tbp
+  region:
+    description: AWS Region
+    type: string
+    default: us-east-1
+steps:
+  # https://circleci.com/docs/openid-connect-tokens/
+  - run:
+      name: Choose ARN
+      command: <<include(scripts/choose-arn.sh)>>
+      environment:
+        AWS_LOGIN_ACCOUNT: << parameters.environment >>
+  - aws-cli/setup:
+      role_arn: $OIDC_ROLE_ARN
+      region: << parameters.region >>

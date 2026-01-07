@@ -1,0 +1,14 @@
+description: Runs Danger.js against a PR to validate the PR.
+executor: default
+steps:
+  - add-github-commiter
+  - add-github-assignees
+  - run:
+      name: write dangerfile
+      command: <<include(scripts/generate-danger.sh)>>
+  - run:
+      name: install danger
+      command: <<include(scripts/install-danger.sh)>>
+  - run:
+      name: run danger.js
+      command: yarn danger ci

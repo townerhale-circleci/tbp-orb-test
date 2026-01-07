@@ -1,0 +1,11 @@
+description: Signals job success manually
+parameters:
+  jobname:
+    type: string
+    description: The name of the job to signal success for
+steps:
+  - run:
+      name: signal job success
+      command: <<include(scripts/signal_success.sh)>>
+      environment:
+        TARGET_JOB: <<parameters.jobname>>

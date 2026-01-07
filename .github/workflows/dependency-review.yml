@@ -1,0 +1,21 @@
+name: Dependency Review
+on:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: write
+    steps:
+      # https://github.com/actions/dependency-review-action
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          comment-summary-in-pr: always
+          allow-licenses: Apache-2.0,BSD-2-Clause,BSD-3-Clause,BlueOak-1.0.0,ISC,MIT,MPL-2.0,Unlicense,0BSD,Zlib,LGPL-2.0-or-later,LGPL-3.0-or-later,ZPL-2.1,LicenseRef-scancode-google-patent-license-golang
+          fail-on-scopes: development,runtime,unknown
+          fail-on-severity: high
+          allow-dependencies-licenses: pkg:npm/@timebyping/eslint-config,pkg:npm/@cspell/dict-en-common-misspellings,pkg:npm/@timebyping/common,pkg:pip/psycopg2,pkg:pip/confluent-kafka,pkg:gomod/github.com/pinginc/cdk8s-platform-definitions

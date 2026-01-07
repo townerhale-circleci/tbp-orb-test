@@ -1,0 +1,24 @@
+description: Triggers a CircleCI pipeline for an infra repo
+executor: default
+parameters:
+  repo:
+    description: The name of the infra repo to trigger a pipeline for, which contains the Terraform and CDK8s definition.
+    type: string
+  env_code:
+    description: The environment to deploy to, one of `dev`, `stg`, `prd`.
+    enum:
+      - dev
+      - stg
+      - prd
+    type: enum
+  image_tag:
+    description: The image tag to deploy.
+    type: string
+steps:
+  - run:
+      name: Trigger infra repo pipeline with parameters
+      command: |
+        curl --location --request POST 'https://circleci.com/api/v2/project/gh/pinginc/<< parameters.repo >>/pipeline' \
+        --header 'Content-Type: application/json' \
+        -u "${CIRCLE_TOKEN}:" \
+        -d '{ "branch": "main", "parameters": { "env_code": "<< parameters.env_code >>" , "image_tag": "<< parameters.image_tag >>" } }'

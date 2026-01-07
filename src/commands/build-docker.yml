@@ -1,0 +1,47 @@
+description: Builds a docker image and pushes it to ECR.
+parameters:
+  app_version:
+    type: string
+    default: latest
+    description: app_version to tag the docker image with.
+  platform:
+    type: string
+    description: The platform to build the docker image for.
+  repo:
+    type: string
+    description: The name of the ECR repository to push the image to.
+  dockerfile:
+    type: string
+    default: Dockerfile
+    description: The path to the Dockerfile to build.
+  on_docker:
+    type: boolean
+    default: false
+    description: Whether running the build on the docker executor.
+  extra_build_args:
+    type: string
+    default: ""
+    description: Extra arguments to pass to the docker build command.
+steps:
+  - checkout
+  - aws-login:
+      environment: tbp
+  - aws-ecr/ecr_login:
+      account_id: ${AWS_ECR_REGISTRY_ID}
+      region: us-east-1
+  - lint-docker:
+      dockerfile: << parameters.dockerfile >>
+  - aws-ecr/build_image:
+      account_id: ${AWS_ECR_REGISTRY_ID}
+      dockerfile: << parameters.dockerfile >>
+      extra_build_args: << parameters.extra_build_args >>
+      platform: << parameters.platform >>
+      region: us-east-1
+      repo: << parameters.repo >>
+      tag: << parameters.app_version >>
+      push_image: false
+  - aws-ecr/push_image:
+      account_id: ${AWS_ECR_REGISTRY_ID}
+      region: us-east-1
+      repo: << parameters.repo >>
+      tag: << parameters.app_version >>

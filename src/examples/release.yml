@@ -1,0 +1,12 @@
+description: |
+  Add semantic release to your build.
+usage:
+  version: 2.1
+  orbs:
+    <orb-name>: <namespace>/<orb-name>@1.2.3
+  workflows:
+    release:
+      jobs:
+        - common/semantic-release:
+            github: true
+            npm: true

@@ -1,0 +1,13 @@
+description: |
+  The docker container to use when running this orb's jobs
+parameters:
+  image:
+    type: string
+    default: cimg/node
+    description: Docker image name
+  tag:
+    type: string
+    default: lts
+    description: Docker image tag
+docker:
+  - image: <<parameters.image>>:<<parameters.tag>>

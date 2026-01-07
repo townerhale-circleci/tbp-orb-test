@@ -1,0 +1,12 @@
+description: Install YQ
+parameters:
+  version:
+    type: string
+    description: "Version of the YQ to install."
+    default: 4.44.6
+steps:
+  - run:
+      environment:
+        YQ_VERSION: "<<parameters.version>>"
+      name: "Install YQ"
+      command: <<include(scripts/install-yq.sh)>>

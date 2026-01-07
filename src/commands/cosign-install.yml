@@ -1,0 +1,16 @@
+description: "Install Cosign"
+parameters:
+  version:
+    type: string
+    description: "Version of the Cosign to install. https://github.com/sigstore/cosign/releases"
+    default: v2.4.1
+steps:
+  - run:
+      environment:
+        COSIGN_VERSION: "<<parameters.version>>"
+      name: "Install Cosign"
+      command: <<include(scripts/install-cosign.sh)>>
+  - run:
+      name: "Check Cosign"
+      command: |
+        cosign version

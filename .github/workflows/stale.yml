@@ -1,0 +1,35 @@
+name: Close stale PRs
+on:
+  schedule:
+    - cron: 0 0 */2 * * # Runs every other day at midnight UTC
+  workflow_dispatch:
+permissions:
+  issues: write
+  pull-requests: write
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v10
+        with:
+          # Only process PRs, not issues
+          days-before-issue-stale: -1
+          days-before-issue-close: -1
+          # PR stale configuration
+          days-before-pr-stale: 15
+          days-before-pr-close: 15 # Additional 15 days after being marked stale (30 days total)
+          # Messages
+          stale-pr-message: |
+            This pull request has been automatically marked as stale because it has not had any activity for 15 days.
+            It will be closed in 15 days if no further activity occurs.
+
+            If you believe this PR should remain open, please add a comment or update the PR.
+          close-pr-message: |
+            This pull request was automatically closed due to inactivity for 30 days.
+
+            If you would like to revisit this PR, please feel free to reopen it.
+          # Label configuration
+          stale-pr-label: stale
+          exempt-pr-labels: work-in-progress,blocked,do-not-close
+          # Limit operations to avoid rate limiting
+          operations-per-run: 100

@@ -1,0 +1,19 @@
+description: Adds github user that can commit to this repo.
+steps:
+  - run:
+      name: Setup ssh directory
+      command: mkdir -p ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
+  - add_ssh_keys
+  - run:
+      name: Set git user email
+      command: git config --global user.email "ci@laurel.ai"
+  - run:
+      name: Set git user name
+      command: git config --global user.name "Laurel CI"
+  - gh/setup:
+      token: GITHUB_TOKEN
+      hostname: github.com
+      version: 2.33.0
+  - run:
+      name: verify ssh settings
+      command: ssh git@github.com || echo "done"

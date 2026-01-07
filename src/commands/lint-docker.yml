@@ -1,0 +1,11 @@
+description: Lint the Dockerfile.
+parameters:
+  dockerfile:
+    type: string
+    default: Dockerfile
+    description: The path to the Dockerfile to lint.
+steps:
+  - docker/hadolint:
+      dockerfiles: << parameters.dockerfile >>
+      trusted-registries: docker.io,592159235076.dkr.ecr.us-east-1.amazonaws.com,quay.io,nvcr.io,ghcr.io
+      failure-threshold: error

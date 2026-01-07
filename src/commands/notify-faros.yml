@@ -1,0 +1,32 @@
+description: Sends a notification to Faros via HTTP POST
+parameters:
+  image:
+    type: string
+    description: "The image to notify Faros about"
+steps:
+  - run:
+      name: Notify Faros
+      command: |
+        curl -s -v --request POST \
+        --url "https://prod.api.faros.ai/graphs/default/events" \
+        --header "Authorization: $FAROS_API_KEY" \
+        --header "Accept: application/json" \
+        --header "Content-Type: application/json" \
+        --data-raw "{
+          \"type\": \"CI\",
+          \"version\": \"0.0.1\",
+          \"data\": {
+            \"commit\": {
+              \"sha\": \"${CIRCLE_SHA1}\",
+              \"repository\": \"${CIRCLE_PROJECT_REPONAME}\",
+              \"organization\": \"${CIRCLE_PROJECT_USERNAME}\",
+              \"source\": \"GitHub\"
+            },
+            \"artifact\": {
+              \"id\": \"<< parameters.image >>\",
+              \"repository\": \"AWS\",
+              \"organization\": \"pinginc\",
+              \"source\": \"ECR\"
+            }
+          }
+        }"

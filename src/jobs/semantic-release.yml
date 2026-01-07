@@ -1,0 +1,50 @@
+description: Creates a semantic release.
+executor: default
+parameters:
+  package-manager:
+    type: string
+    default: yarn
+    description: "Which package manager to use. Options: 'yarn', 'npm', or 'pnpm'"
+  executor-tag:
+    type: string
+    default: lts
+    description: |
+      Pick a specific circleci/node image variant: https://hub.docker.com/r/cimg/node/tags
+  npm:
+    type: boolean
+    description: Release package to NPM
+    default: false
+  github:
+    type: boolean
+    description: Create github release if true.
+    default: true
+  dry-run:
+    type: boolean
+    description: Don't do release if true.
+    default: false
+  branch:
+    type: string
+    description: Branch to deploy from
+    default: main
+  npm-token:
+    description: environment variable holding NPM token to get packages.
+    default: NPM_AUTH_TOKEN
+    type: env_var_name
+  mute-slack:
+    type: boolean
+    description: Do not notify to slack if true.
+    default: false
+steps:
+  - checkout
+  - semantic-release-install:
+      package-manager: << parameters.package-manager >>
+      executor-tag: << parameters.executor-tag >>
+      npm: << parameters.npm >>
+      github: << parameters.github >>
+      branch: << parameters.branch >>
+      npm-token: << parameters.npm-token >>
+      mute-slack: << parameters.mute-slack >>
+  - semantic-release:
+      package-manager: << parameters.package-manager >>
+      executor-tag: << parameters.executor-tag >>
+      dry-run: << parameters.dry-run >>

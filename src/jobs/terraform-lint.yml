@@ -1,0 +1,85 @@
+description: Validates a terraform directory
+docker:
+  - image: cimg/go:1.24
+parameters:
+  root-dir:
+    type: string
+    default: terraform
+    description: Path to root of terraform directory
+  environments:
+    type: boolean
+    default: true
+    description: Are there environment folders to validate?
+  commit:
+    type: boolean
+    default: true
+    description: commit updated docs
+  workspace:
+    type: string
+    default: ""
+    description: use a specific tf workspace
+  errors:
+    type: boolean
+    default: true
+    description: Should we raise errors in our tf checks
+steps:
+  - checkout
+  - when:
+      condition: << parameters.commit >>
+      steps:
+        - add-github-commiter
+  - terraform-install
+  - when:
+      condition: << parameters.environments >>
+      steps:
+        - run:
+            name: dir check modules
+            command: mkdir -p << parameters.root-dir >>/modules
+        - run:
+            name: dir check environments
+            command: mkdir -p << parameters.root-dir >>/{dev,prd}
+        - terraform-init:
+            environment: dev
+            root-dir: << parameters.root-dir >>
+            workspace: << parameters.workspace >>
+        - terraform-validate:
+            environment: dev
+            root-dir: << parameters.root-dir >>
+            workspace: << parameters.workspace >>
+            errors: << parameters.errors >>
+        - terraform-generate-docs:
+            root-dir: << parameters.root-dir >>/dev
+            commit: << parameters.commit >>
+            workspace: << parameters.workspace >>
+        - terraform-init:
+            environment: prd
+            root-dir: << parameters.root-dir >>
+            workspace: << parameters.workspace >>
+        - terraform-validate:
+            environment: prd
+            root-dir: << parameters.root-dir >>
+            commit: << parameters.commit >>
+            workspace: << parameters.workspace >>
+            errors: << parameters.errors >>
+        - terraform-generate-docs:
+            root-dir: << parameters.root-dir >>/prd
+            commit: << parameters.commit >>
+            workspace: << parameters.workspace >>
+  - when:
+      condition:
+        not: << parameters.environments >>
+      steps:
+        - terraform-init:
+            root-dir: << parameters.root-dir >>
+            environment: .
+            workspace: << parameters.workspace >>
+        - terraform-validate:
+            environment: .
+            root-dir: << parameters.root-dir >>
+            commit: << parameters.commit >>
+            workspace: << parameters.workspace >>
+            errors: << parameters.errors >>
+        - terraform-generate-docs:
+            root-dir: << parameters.root-dir >>
+            commit: << parameters.commit >>
+            workspace: << parameters.workspace >>

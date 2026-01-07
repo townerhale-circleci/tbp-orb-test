@@ -1,0 +1,9 @@
+description: Signals job success manually
+executor: default
+parameters:
+  jobname:
+    description: The name of the job to signal success for
+    type: string
+steps:
+  - signal-job-success:
+      jobname: <<parameters.jobname>>

@@ -1,0 +1,39 @@
+version: 2.1
+setup: true
+orbs:
+  orb-tools: circleci/orb-tools@11
+  shellcheck: circleci/shellcheck@3
+filters: &filters
+  tags:
+    only: /.*/
+workflows:
+  lint-pack:
+    jobs:
+      - orb-tools/lint:
+          filters: *filters
+      - orb-tools/pack:
+          filters: *filters
+      - orb-tools/review:
+          filters: *filters
+          exclude: RC005,RC006,RC007,RC009
+      - shellcheck/check:
+          exclude: SC1090,SC2148,SC2038,SC2086,SC2002,SC2016,SC2155
+          filters: *filters
+      - orb-tools/publish:
+          orb-name: townerhale/tbp-orb-test
+          vcs-type: << pipeline.project.type >>
+          requires:
+            - orb-tools/lint
+            - orb-tools/review
+            - orb-tools/pack
+            - shellcheck/check
+          context:
+            - GITHUB
+          filters: *filters
+      # Triggers the next workflow in the Orb Development Kit.
+      - orb-tools/continue:
+          pipeline-number: << pipeline.number >>
+          vcs-type: << pipeline.project.type >>
+          requires:
+            - orb-tools/publish
+          filters: *filters

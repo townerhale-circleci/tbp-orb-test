@@ -1,0 +1,18 @@
+description: Applies a terraform directory.
+parameters:
+  app_version:
+    type: string
+    default: latest
+    description: app_version to pass to terraform as a variable. Often used for deploying certain image versions.
+  stack:
+    type: string
+    description: If we need to specify a spacelift stack, what is it?
+steps:
+  - run:
+      name: Set app_version in spacelift
+      command: |
+        spacectl stack environment setvar --id << parameters.stack >> TF_VAR_app_version << parameters.app_version >>
+  - run:
+      name: run apply
+      no_output_timeout: 30m
+      command: spacectl stack deploy --id << parameters.stack >> --sha $CIRCLE_SHA1 --auto-confirm

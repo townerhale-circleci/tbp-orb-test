@@ -1,0 +1,43 @@
+description: Builds the docker image for arm and pushes it to ECR.
+executor: tbp-docker
+parameters:
+  repo:
+    description: ECR Repository
+    type: string
+  app_version:
+    description: Version of the app to tag the docker image with
+    type: string
+  architectures:
+    description: Architectures to merge, seperated by comma
+    type: string
+    default: arm,amd
+  cosign_key_arn:
+    description: ARN of the KMS key to use for signing
+    type: string
+    default: arn:aws:kms:us-east-1:592159235076:alias/cosign-key
+steps:
+  - cosign-install
+  - aws-login:
+      environment: tbp
+  - aws-ecr/ecr_login:
+      account_id: ${AWS_ECR_REGISTRY_ID}
+      region: us-east-1
+  - run:
+      name: Build Docker Manifest
+      command: |
+        echo "Building Docker Manifest for << parameters.repo >>:<< parameters.app_version >>"
+        if [[ "<< parameters.architectures >>" == "arm,amd" ]]; then
+          echo "Multiple Architectures"
+          docker manifest create 592159235076.dkr.ecr.us-east-1.amazonaws.com/<< parameters.repo >>:<< parameters.app_version >> 592159235076.dkr.ecr.us-east-1.amazonaws.com/<< parameters.repo >>:<< parameters.app_version >>-{<< parameters.architectures >>}
+        else
+          echo "Single Architecture"
+          docker manifest create 592159235076.dkr.ecr.us-east-1.amazonaws.com/<< parameters.repo >>:<< parameters.app_version >> 592159235076.dkr.ecr.us-east-1.amazonaws.com/<< parameters.repo >>:<< parameters.app_version >>-<< parameters.architectures >>
+        fi
+
+        docker manifest push 592159235076.dkr.ecr.us-east-1.amazonaws.com/<< parameters.repo >>:<< parameters.app_version >>
+  - run:
+      name: sign image with cosign
+      command: |
+        cosign sign -r --yes --key awskms:///<< parameters.cosign_key_arn >> 592159235076.dkr.ecr.us-east-1.amazonaws.com/<< parameters.repo >>:<< parameters.app_version >>
+  - notify-faros:
+      image: 592159235076.dkr.ecr.us-east-1.amazonaws.com/<< parameters.repo >>:<< parameters.app_version >>

@@ -1,0 +1,101 @@
+description: |
+  This will configure a .releaserc.json and install necessary dependencies.
+parameters:
+  package-manager:
+    type: string
+    default: yarn
+    description: Which package manager to use. 'yarn' or 'npm'
+  executor-tag:
+    type: string
+    default: lts
+    description: |
+      Pick a specific circleci/node image variant: https://hub.docker.com/r/cimg/node/tags
+  npm:
+    type: boolean
+    default: false
+    description: Publish package to npm if true.
+  github:
+    type: boolean
+    default: true
+    description: Publish release on Github if true.
+  branch:
+    type: string
+    default: main
+    description: What branch to release from.
+  npm-token:
+    description: environment variable holding NPM token to get packages.
+    default: NPM_AUTH_TOKEN
+    type: env_var_name
+  mute-slack:
+    type: boolean
+    default: false
+    description: Mute slack notifications if true.
+steps:
+  - jq/install
+  - run:
+      name: add npm token
+      command: echo "//registry.npmjs.org/:_authToken=${<< parameters.npm-token >>}" > ~/.npmrc
+      executor:
+        name: common/default
+        tag: << parameters.executor-tag >>
+  - run:
+      name: install moreutils
+      command: <<include(scripts/install-moreutils.sh)>>
+      executor:
+        name: common/default
+        tag: << parameters.executor-tag >>
+  - run:
+      shell: /bin/bash
+      name: write releaserc
+      command: <<include(scripts/generate-release.sh)>>
+      executor:
+        name: common/default
+        tag: << parameters.executor-tag >>
+      environment:
+        RELEASERC_COMMAND: create
+        RELEASERC_BRANCH: << parameters.branch >>
+  - when:
+      condition: << parameters.npm >>
+      steps:
+        - run:
+            shell: /bin/bash
+            name: update releaserc (npm)
+            command: <<include(scripts/generate-release.sh)>>
+            executor:
+              name: common/default
+              tag: << parameters.executor-tag >>
+            environment:
+              RELEASERC_COMMAND: add-npm
+  - when:
+      condition: << parameters.github >>
+      steps:
+        - run:
+            shell: /bin/bash
+            name: update releaserc (github)
+            command: <<include(scripts/generate-release.sh)>>
+            executor:
+              name: common/default
+              tag: << parameters.executor-tag >>
+            environment:
+              RELEASERC_COMMAND: add-github
+  - run:
+      shell: /bin/bash
+      name: update releaserc (end publish)
+      command: <<include(scripts/generate-release.sh)>>
+      executor:
+        name: common/default
+        tag: << parameters.executor-tag >>
+      environment:
+        RELEASERC_COMMAND: add-end
+        MUTE_SLACK: << parameters.mute-slack >>
+  - run:
+      name: install semantic release package
+      command: <<include(scripts/install-semantic-release.sh)>>
+      executor:
+        name: common/default
+        tag: << parameters.executor-tag >>
+      environment:
+        PACKAGE_MANAGER: << parameters.package-manager >>
+  - run:
+      name: echo releaserc
+      command: cat .releaserc.json

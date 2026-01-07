@@ -1,0 +1,25 @@
+description: Builds the docker image for x86 and pushes it to ECR.
+executor: tbp-docker
+resource_class: 2xlarge
+parameters:
+  dockerfile:
+    default: Dockerfile
+    description: Path to the Dockerfile
+    type: string
+  repo:
+    description: ECR Repository
+    type: string
+  app_version:
+    description: Version of the app to tag the docker image with
+    type: string
+  extra_build_args:
+    type: string
+    default: ""
+    description: Extra arguments to pass to the docker build command.
+steps:
+  - build-docker:
+      app_version: << parameters.app_version >>-amd
+      platform: linux/amd64
+      repo: << parameters.repo >>
+      dockerfile: << parameters.dockerfile >>
+      extra_build_args: << parameters.extra_build_args >>

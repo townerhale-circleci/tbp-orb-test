@@ -1,0 +1,14 @@
+description: OpenTofu and Spacelift install
+steps:
+  - run:
+      name: install opentofu
+      environment:
+        # https://github.com/opentofu/opentofu/releases
+        OPENTOFU_VERSION: 1.10.6
+      command: <<include(scripts/install-opentofu.sh)>>
+  - run:
+      name: install spacectl
+      environment:
+        # https://github.com/spacelift-io/spacectl/releases
+        SPACECTL_VERSION: 1.16.0
+      command: <<include(scripts/install-spacectl.sh)>>
