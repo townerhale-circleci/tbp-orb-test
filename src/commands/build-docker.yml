@@ -14,14 +14,10 @@ parameters:
     type: string
     default: Dockerfile
     description: The path to the Dockerfile to build.
-  on_docker:
-    type: boolean
-    default: false
-    description: Whether running the build on the docker executor.
   extra_build_args:
     type: string
     default: ""
-    description: Extra arguments to pass to the docker build command.
+    description: Extra arguments to pass to the docker build command (e.g., --cache-from, --cache-to).
 steps:
   - checkout
   - aws-login:
@@ -31,15 +27,25 @@ steps:
       region: us-east-1
   - lint-docker:
       dockerfile: << parameters.dockerfile >>
-  - aws-ecr/build_image:
-      account_id: ${AWS_ECR_REGISTRY_ID}
-      dockerfile: << parameters.dockerfile >>
-      extra_build_args: << parameters.extra_build_args >>
-      platform: << parameters.platform >>
-      region: us-east-1
-      repo: << parameters.repo >>
-      tag: << parameters.app_version >>
-      push_image: false
+  - run:
+      name: Setup buildx
+      command: |
+        docker buildx create --use --name circleci || docker buildx use circleci
+        docker buildx inspect --bootstrap
+  - run:
+      name: Build Docker image with buildx
+      command: |
+        echo "Building << parameters.repo >>:<< parameters.app_version >>"
+        echo "Platform: << parameters.platform >>"
+        echo "Extra args: << parameters.extra_build_args >>"
+        
+        docker buildx build \
+          --load \
+          --platform << parameters.platform >> \
+          << parameters.extra_build_args >> \
+          -t ${AWS_ECR_REGISTRY_ID}.dkr.ecr.us-east-1.amazonaws.com/<< parameters.repo >>:<< parameters.app_version >> \
+          -f << parameters.dockerfile >> \
+          .
   - aws-ecr/push_image:
       account_id: ${AWS_ECR_REGISTRY_ID}
       region: us-east-1

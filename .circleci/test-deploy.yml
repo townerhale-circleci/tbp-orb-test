@@ -1,6 +1,6 @@
 version: 2.1
 orbs:
-  common: townerhale/tbp-orb-test@dev:<<pipeline.git.revision>>
+  common: townerhale/tbp-orb-test@dev:alpha
   orb-tools: circleci/orb-tools@11
 
 filters: &filters
@@ -16,7 +16,35 @@ jobs:
       - run:
           name: Verify orb loaded
           command: echo "Orb loaded successfully"
+  docker-build-no-dlc: 
+    machine:
+      image: ubuntu-2204:current
+      docker_layer_caching: false
+    resource_class: large
+    steps:
+      - checkout 
+      - run: 
+        name: Build Docker image (no dlc) 
+        command: |
+          echo "Starting build without DLC..."
+          time docker build -f Dockerfile.test -t dlc-test:no-dlc .
+          echo "Build complete!"
+  docker-build-with-dlc: 
+    machine:
+      image: ubuntu-2204:current
+      docker_layer_caching: true
+    resource_class: large 
+    steps: 
+    - checkout 
+    - run: 
+      name: Build Docker image (with dlc)
+      command: |
+        echo "Starting build with DLC..."
+        time docker build -f Dockerfile.test -t dlc-test:with-dlc . 
+        echo "Build complete!" 
 
+    
+    machine:
 workflows:
   test-deploy:
     jobs:
