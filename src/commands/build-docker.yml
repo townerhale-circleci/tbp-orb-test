@@ -55,13 +55,13 @@ steps:
       command: |
         echo "Building << parameters.repo >>:<< parameters.app_version >>"
         echo "Platform: << parameters.platform >>"
-        
+
         CACHE_ARGS=""
         if [ "<< parameters.use_buildx_cache >>" = "true" ]; then
           mkdir -p /tmp/buildx-cache
           CACHE_ARGS="--cache-from type=local,src=/tmp/buildx-cache --cache-to type=local,dest=/tmp/buildx-cache-new,mode=max"
         fi
-        
+
         docker buildx build \
           --load \
           --platform << parameters.platform >> \
