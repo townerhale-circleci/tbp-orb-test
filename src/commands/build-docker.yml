@@ -17,16 +17,34 @@ parameters:
   extra_build_args:
     type: string
     default: ""
-    description: Extra arguments to pass to the docker build command (e.g., --cache-from, --cache-to).
+    description: Extra arguments to pass to the docker build command.
+  use_buildx_cache:
+    type: boolean
+    default: true
+    description: Enable buildx local caching via CircleCI cache.
 steps:
   - checkout
-  - aws-login:
-      environment: tbp
-  - aws-ecr/ecr_login:
-      account_id: ${AWS_ECR_REGISTRY_ID}
+  # Customer-specific steps (commented out for testing)
+  # - aws-login:
+  #     environment: tbp
+  # - lint-docker:
+  #     dockerfile: << parameters.dockerfile >>
+  - aws-cli/setup:
+      role_arn: ${AWS_ROLE_ARN}
       region: us-east-1
-  - lint-docker:
-      dockerfile: << parameters.dockerfile >>
+  - run:
+      name: Login to ECR
+      command: |
+        aws ecr get-login-password --region us-east-1 | \
+        docker login --username AWS --password-stdin ${AWS_ECR_REGISTRY_ID}.dkr.ecr.us-east-1.amazonaws.com
+  - when:
+      condition: << parameters.use_buildx_cache >>
+      steps:
+        - restore_cache:
+            keys:
+              - buildx-<< parameters.repo >>-<< parameters.platform >>-{{ checksum "<< parameters.dockerfile >>" }}
+              - buildx-<< parameters.repo >>-<< parameters.platform >>-
+              - buildx-<< parameters.repo >>-
   - run:
       name: Setup buildx
       command: |
@@ -37,17 +55,34 @@ steps:
       command: |
         echo "Building << parameters.repo >>:<< parameters.app_version >>"
         echo "Platform: << parameters.platform >>"
-        echo "Extra args: << parameters.extra_build_args >>"
-
+        
+        CACHE_ARGS=""
+        if [ "<< parameters.use_buildx_cache >>" = "true" ]; then
+          mkdir -p /tmp/buildx-cache
+          CACHE_ARGS="--cache-from type=local,src=/tmp/buildx-cache --cache-to type=local,dest=/tmp/buildx-cache-new,mode=max"
+        fi
+        
         docker buildx build \
           --load \
           --platform << parameters.platform >> \
+          $CACHE_ARGS \
           << parameters.extra_build_args >> \
           -t ${AWS_ECR_REGISTRY_ID}.dkr.ecr.us-east-1.amazonaws.com/<< parameters.repo >>:<< parameters.app_version >> \
           -f << parameters.dockerfile >> \
           .
-  - aws-ecr/push_image:
-      account_id: ${AWS_ECR_REGISTRY_ID}
-      region: us-east-1
-      repo: << parameters.repo >>
-      tag: << parameters.app_version >>
+  - when:
+      condition: << parameters.use_buildx_cache >>
+      steps:
+        - run:
+            name: Prepare cache for saving
+            command: |
+              rm -rf /tmp/buildx-cache
+              mv /tmp/buildx-cache-new /tmp/buildx-cache || true
+        - save_cache:
+            key: buildx-<< parameters.repo >>-<< parameters.platform >>-{{ checksum "<< parameters.dockerfile >>" }}
+            paths:
+              - /tmp/buildx-cache
+  - run:
+      name: Push image to ECR
+      command: |
+        docker push ${AWS_ECR_REGISTRY_ID}.dkr.ecr.us-east-1.amazonaws.com/<< parameters.repo >>:<< parameters.app_version >>
