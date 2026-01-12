@@ -27,7 +27,7 @@ steps:
   #     dockerfile: << parameters.dockerfile >>
   - aws-cli/setup:
       role_arn: ${AWS_ROLE_ARN}
-      region: us-east-1
+      region: us-west-2
   - run:
       name: Login to ECR
       command: |
