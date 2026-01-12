@@ -31,7 +31,7 @@ steps:
   - run:
       name: Login to ECR
       command: |
-        aws ecr get-login-password --region us-east-1 | \
+        aws ecr get-login-password --region us-west-2 | \
         docker login --username AWS --password-stdin ${AWS_ECR_REGISTRY_ID}.dkr.ecr.us-east-1.amazonaws.com
   - run:
       name: Setup buildx
@@ -49,10 +49,10 @@ steps:
           --load \
           --platform << parameters.platform >> \
           << parameters.extra_build_args >> \
-          -t ${AWS_ECR_REGISTRY_ID}.dkr.ecr.us-east-1.amazonaws.com/<< parameters.repo >>:<< parameters.app_version >> \
+          -t ${AWS_ECR_REGISTRY_ID}.dkr.ecr.us-west-2.amazonaws.com/<< parameters.repo >>:<< parameters.app_version >> \
           -f << parameters.dockerfile >> \
           .
   - run:
       name: Push image to ECR
       command: |
-        docker push ${AWS_ECR_REGISTRY_ID}.dkr.ecr.us-east-1.amazonaws.com/<< parameters.repo >>:<< parameters.app_version >>
+        docker push ${AWS_ECR_REGISTRY_ID}.dkr.ecr.us-west-2.amazonaws.com/<< parameters.repo >>:<< parameters.app_version >>
