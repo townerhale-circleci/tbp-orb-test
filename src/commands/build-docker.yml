@@ -38,7 +38,7 @@ steps:
         echo "Building << parameters.repo >>:<< parameters.app_version >>"
         echo "Platform: << parameters.platform >>"
         echo "Extra args: << parameters.extra_build_args >>"
-        
+
         docker buildx build \
           --load \
           --platform << parameters.platform >> \
