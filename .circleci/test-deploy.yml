@@ -42,9 +42,6 @@ jobs:
         echo "Starting build with DLC..."
         time docker build -f Dockerfile.test -t dlc-test:with-dlc . 
         echo "Build complete!" 
-
-    
-    machine:
 workflows:
   test-deploy:
     jobs:
