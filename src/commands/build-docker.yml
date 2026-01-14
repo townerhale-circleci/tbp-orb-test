@@ -1,5 +1,9 @@
 description: Builds a docker image and pushes it to ECR.
 parameters:
+  environment:
+    type: string
+    default: tbp
+    description: AWS environment to login to
   app_version:
     type: string
     default: latest
@@ -25,7 +29,7 @@ parameters:
 steps:
   - checkout
   - aws-login:
-      environment: tbp
+      environment: << parameters.environment >>
   - aws-ecr/ecr_login:
       account_id: ${AWS_ECR_REGISTRY_ID}
       region: us-east-1
@@ -37,11 +41,4 @@ steps:
       extra_build_args: << parameters.extra_build_args >>
       platform: << parameters.platform >>
       region: us-east-1
-      repo: << parameters.repo >>
-      tag: << parameters.app_version >>
-      push_image: false
-  - aws-ecr/push_image:
-      account_id: ${AWS_ECR_REGISTRY_ID}
-      region: us-east-1
-      repo: << parameters.repo >>
-      tag: << parameters.app_version >>
+      repo: << parameters.repo

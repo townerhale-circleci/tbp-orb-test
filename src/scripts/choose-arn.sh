@@ -16,6 +16,8 @@ arn() {
     ;;
     "tbp") echo "arn:aws:iam::592159235076:role/circleci-oidc-provider-aws"
     ;;
+    "towner") echo "arn:aws:iam::992382483259:role/circleci-oidc-provider-aws"
+    ;;
     *) echo "Invalid account"
     exit 1
     ;;
