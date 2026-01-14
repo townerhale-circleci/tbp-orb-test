@@ -41,4 +41,5 @@ steps:
       extra_build_args: << parameters.extra_build_args >>
       platform: << parameters.platform >>
       region: us-east-1
-      repo: << parameters.repo
+      repo: << parameters.repo >>
+
