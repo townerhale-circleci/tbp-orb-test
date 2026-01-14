@@ -2,6 +2,10 @@ description: Builds the docker image for x86 and pushes it to ECR.
 executor: tbp-docker
 resource_class: medium
 parameters:
+  environment:
+    type: string
+    default: tbp
+    description: AWS environment to login to
   dockerfile:
     default: Dockerfile
     description: Path to the Dockerfile
@@ -18,6 +22,7 @@ parameters:
     description: Extra arguments to pass to the docker build command.
 steps:
   - build-docker:
+      environment: << parameters.environment >>
       app_version: << parameters.app_version >>-amd
       platform: linux/amd64
       repo: << parameters.repo >>
