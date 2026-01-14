@@ -1,6 +1,6 @@
 description: Builds the docker image for x86 and pushes it to ECR.
 executor: tbp-docker
-resource_class: 2xlarge
+resource_class: medium
 parameters:
   dockerfile:
     default: Dockerfile

@@ -1,6 +1,6 @@
 description: Builds the docker image for arm and pushes it to ECR.
 executor: tbp-docker
-resource_class: arm.2xlarge
+resource_class: medium
 parameters:
   dockerfile:
     default: Dockerfile
