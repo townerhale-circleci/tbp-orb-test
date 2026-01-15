@@ -6,5 +6,5 @@ parameters:
     default: medium
 machine:
   image: ubuntu-2204:current
-  docker_layer_caching: false
+  docker_layer_caching: true
 resource_class: <<parameters.resource_class>>
