@@ -1,5 +1,5 @@
 description: Builds the docker image for x86 and pushes it to ECR.
-executor: 
+executor:
   name: tbp-docker
   docker_layer_caching: << parameters.docker_layer_caching >>
 resource_class: medium
@@ -22,7 +22,7 @@ parameters:
     type: string
     default: ""
     description: Extra arguments to pass to the docker build command.
-  docker_layer_caching: 
+  docker_layer_caching:
     type: boolean
     default: false
     description: "Enable Docker Layer Caching for this build"

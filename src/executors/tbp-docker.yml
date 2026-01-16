@@ -4,9 +4,9 @@ parameters:
   resource_class:
     type: string
     default: medium
-  docker_layer_caching: 
+  docker_layer_caching:
     type: boolean
-    default: false 
+    default: false
     description: "Enable Docker Layer Caching"
 machine:
   image: ubuntu-2204:current
