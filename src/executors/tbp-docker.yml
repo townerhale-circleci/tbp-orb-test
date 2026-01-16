@@ -10,5 +10,5 @@ parameters:
     description: "Enable Docker Layer Caching"
 machine:
   image: ubuntu-2204:current
-  docker_layer_caching: << parameters.docker_layer_caching >> 
+  docker_layer_caching: << parameters.docker_layer_caching >>
 resource_class: <<parameters.resource_class>>
